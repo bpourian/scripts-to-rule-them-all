@@ -1,0 +1,49 @@
+# Sample docker-compose.yml
+# In this example we use a shared database config
+# That is stored in other repository
+# As we agree on docker-compose names we can just do
+# an external link on them
+
+common:
+  build: .
+  environment:
+    - NODE_ENV
+  volumes:
+    - .:/code
+    - node_modules
+  external_links:
+    - ${NOCONFLICTPREFIX}pagarmedatabase_mongo_1:pagarme_mongo
+    - ${NOCONFLICTPREFIX}pagarmedatabase_mysql_1:pagarme_mysql
+    - ${NOCONFLICTPREFIX}pagarmedatabase_elasticsearch_1:pagarme_elasticsearch
+    - ${NOCONFLICTPREFIX}pagarmedatabase_redis_1:pagarme_redis
+
+web:
+  extends: common
+  command: node bin/server.js
+  ports:
+    - 3000:3000
+  volumes_from:
+    - common
+
+worker:
+  extends: common
+  command: node bin/worker.js
+  volumes_from:
+    - common
+
+test:
+  extends: common
+  command: script/run-tests
+  links:
+    - test-web
+  volumes_from:
+    - common
+test-web:
+  extends: web
+  volumes_from:
+    - web
+test-worker:
+  extends: worker
+  volumes_from:
+    - worker
+

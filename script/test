@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd "$(dirname "$0")/.."
+
+# Force web and worker to be running
+script/docker-compose-noconflict restart test-worker
+script/docker-compose-noconflict restart test-web
+
+script/docker-compose-noconflict run --rm test
+RESULT=$?
+
+script/docker-compose-noconflict stop test-
+script/docker-compose-noconflict stop test-worker
+
+exit $RESULT
+ 

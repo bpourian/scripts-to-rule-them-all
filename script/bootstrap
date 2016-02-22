@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+if [ -f ".node-version" ] && [ -z "$(nodenv version-name 2>/dev/null)" ]; then
+	echo "==> Installing node"
+	nodenv install --skip-existing
+fi
+
+if [ -f ".ruby-version" ] && [ -z "$(rbenv version-name 2>/dev/null)" ]; then
+    echo "==> Installing Ruby…"
+    rbenv install --skip-existing
+    which bundle >/dev/null 2>&1 || {
+        gem install bundler
+        rbenv rehash
+    }
+fi
+
+if [ -f "package.json" ]; then
+	echo "==> Installing npm dependencies..."
+	npm install --silent --no-spin
+fi
+
+if [ -f "Gemfile" ]; then
+    echo "==> Installing gem dependencies…"
+    bundle check --path vendor/gems >/dev/null 2>&1  || {
+        bundle install --path vendor/gems --quiet --without production
+    }
+fi
+
+if [ -f "docker-compose.yml" ]; then
+	script/docker-compose-noconflict pull
+	script/docker-compose-noconflict build
+fi
+
