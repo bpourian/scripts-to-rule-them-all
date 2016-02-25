@@ -1,49 +1,40 @@
-# Sample docker-compose.yml
-# In this example we use a shared database config
-# That is stored in other repository
-# As we agree on docker-compose names we can just do
-# an external link on them
+version: '2'
 
-common:
-  build: .
-  environment:
-    - NODE_ENV
-  volumes:
-    - .:/code
-    - node_modules
-  external_links:
-    - ${NOCONFLICTPREFIX}pagarmedatabase_mongo_1:pagarme_mongo
-    - ${NOCONFLICTPREFIX}pagarmedatabase_mysql_1:pagarme_mysql
-    - ${NOCONFLICTPREFIX}pagarmedatabase_elasticsearch_1:pagarme_elasticsearch
-    - ${NOCONFLICTPREFIX}pagarmedatabase_redis_1:pagarme_redis
+volumes:
+  node_modules: {}
 
-web:
-  extends: common
-  command: node bin/server.js
-  ports:
-    - 3000:3000
-  volumes_from:
-    - common
+services:
+  mysql:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pagarme
+      MYSQL_USER: pagarme
+      MYSQL_PASSWORD: "p4g4rm3_db$$"
 
-worker:
-  extends: common
-  command: node bin/worker.js
-  volumes_from:
-    - common
+  base:
+    build: .
+    volumes:
+      - .:/code
+      - node_modules:/code/node_modules
 
-test:
-  extends: common
-  command: script/run-tests
-  links:
-    - test-web
-  volumes_from:
-    - common
-test-web:
-  extends: web
-  volumes_from:
-    - web
-test-worker:
-  extends: worker
-  volumes_from:
-    - worker
+  common:
+    image: ${PROJECTPREFIX}_base
+    environment:
+      - NODE_ENV
+    volumes:
+      - .:/code
+      - node_modules:/code/node_modules
+    external_links:
+      - ${PROJECTPREFIX}_mysql_1
+
+  web:
+    extends: common
+    command: node bin/server.js
+    ports:
+      - 5000:5000
+  worker:
+    extends: common
+    command: node bin/worker.js
+
 
