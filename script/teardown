@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+script/docker-compose-noconflict down -v --rmi local
+

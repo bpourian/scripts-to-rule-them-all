@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+# Create config files
+cat > config/database.json <<EOF
+{
+	"development": {
+		"host": "mysql",
+		"dialect": "mysql",
+		"database": "pagarme",
+		"username": "pagarme",
+		"password": "pagarme",
+		"logging": false
+	},
+	"production": {
+		"host": "mysql",
+		"dialect": "mysql",
+		"database": "pagarme",
+		"username": "pagarme",
+		"password": "pagarme",
+		"logging": false
+	},
+	"test": {
+		"host": "mysql",
+		"dialect": "mysql",
+		"database": "pagarme",
+		"username": "pagarme",
+		"password": "pagarme",
+		"logging": false
+	}
+}
+EOF
+
+# Migrate the database
+script/run node_modules/.bin/sequelize db:migrate
+

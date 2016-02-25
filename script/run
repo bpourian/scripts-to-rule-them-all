@@ -2,5 +2,5 @@
 
 cd "$(dirname "$0")/.."
 
-exec script/docker-compose-noconflict --rm common $*
+exec script/docker-compose-noconflict run --rm common $*
 

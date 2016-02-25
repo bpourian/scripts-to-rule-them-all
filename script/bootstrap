@@ -31,7 +31,7 @@ if [ -f "Gemfile" ]; then
 fi
 
 if [ -f "docker-compose.yml" ]; then
-	script/docker-compose-noconflict pull
-	script/docker-compose-noconflict build
+	script/rebuild
+	script/docker-compose-noconflict pull --ignore-pull-failures
 fi
 
